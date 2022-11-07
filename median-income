@@ -1,0 +1,106 @@
+library(tidyverse)
+library(tidycensus)
+
+census_api_key("f7099d8d1c5bef7d3ee8d930d8f8d983adf42734", install = TRUE)
+
+v2020 <- load_variables(2020, "acs5", cache = TRUE)
+
+# EXAMPLE 1 - NEW YORK COUNTY
+# MEDIAN INCOME FOR GOOGLE OFFICE IN NEW YORK (FOREIGN-BORN)
+# B06011_005: Estimate!!Median income in the past 12 months --!!Total:!!Foreign born
+ny_foreign_income<- get_acs(state = "NY",
+                         county = "New York",
+                         geography = "tract",
+                         variables =  "B06011_005",
+                         survey = "acs5",
+                         year = 2020,
+                         geometry = TRUE)
+
+ny_foreign_income %>% 
+  ggplot(aes(fill=estimate)) + 
+  geom_sf() + 
+  labs(title = "Median Income for Foreign-Born Residents of Manhattan (2020)",
+       fill="Median Income") +
+  theme_minimal() +
+  coord_sf(crs = 26916, datum = NA) +
+  theme(axis.text.x = element_text(angle = 45))+
+  scale_fill_viridis_c(option = "magma", labels = scales::dollar)
+
+
+# MEDIAN INCOME FOR GOOGLE OFFICE IN NEW YORK (NATIVE)
+ny_native_income<- get_acs(state = "NY",
+                        county = "New York",
+                        geography = "tract",
+                        variables =  "B06011_002",
+                        survey = "acs5",
+                        year = 2020,
+                        geometry = TRUE)
+
+ny_native_income %>% 
+  ggplot(aes(fill=estimate)) + 
+  geom_sf() + 
+  labs(title = "Median Income for Native Residents of Manhattan (2020)",
+       fill="Median Income") +
+  theme_minimal() +
+  coord_sf(crs = 26916, datum = NA) +
+  theme(axis.text.x = element_text(angle = 45))+
+  scale_fill_viridis_c(option = "magma", labels = scales::dollar)
+
+
+# EXAMPLE 2 - SAN FRANCISCO CALIFORNIA
+# MEDIAN INCOME FOR GOOGLE OFFICE IN SAN FRANCISCO (FOREIGN-BORN)
+# B06011_005: Estimate!!Median income in the past 12 months --!!Total:!!Foreign born
+sf_foreign_income<- get_acs(state = "CA",
+                          county = "San Francisco",
+                          geography = "tract",
+                          variables =  "B06011_005",
+                          survey = "acs5",
+                          year = 2020,
+                          geometry = TRUE)
+
+sf_foreign_incomefilter <- sf_foreign_income %>%
+  filter(GEOID != '06075980401')
+
+sf_foreign_incomefilter %>% 
+  ggplot(aes(fill=estimate)) + 
+  geom_sf() + 
+  labs(title = "Median Income for Foreign-Born Residents of San Francisco (2020)",
+       subtitle = "San Francisco County",
+       fill="Median Income") +
+  theme_minimal() +
+  coord_sf(crs = 26916, datum = NA) +
+  scale_fill_viridis_c(option = "magma", labels = scales::dollar)
+
+
+# MEDIAN INCOME FOR GOOGLE OFFICE IN SAN FRANCISCO (NATIVE)
+sf_native_income<- get_acs(state = "CA",
+                         county = "San Francisco",
+                         geography = "tract",
+                         variables =  "B06011_002",
+                         survey = "acs5",
+                         year = 2020,
+                         geometry = TRUE)
+
+sf_native_incomefilter <- sf_native_income %>%
+  filter(GEOID != '06075980401')
+
+sf_native_incomefilter %>% 
+  ggplot(aes(fill=estimate)) + 
+  geom_sf() + 
+  labs(title = "Median Income for Native Residents of San Francisco (2020)",
+       subtitle = "San Francisco County",
+       fill="Median Income") +
+  theme_minimal() +
+  coord_sf(crs = 26916, datum = NA) +
+  theme(axis.text.x = element_text(angle = 45))+
+  scale_fill_viridis_c(option = "magma", labels = scales::dollar)
+
+
+# EXPORT DATAFRAME TO CSV
+write_csv(ny_foreign_income, 'ny_foreign_income.csv')
+
+write_csv(ny_native_income, 'ny_native_income.csv')
+
+write_csv(sf_foreign_incomefilter, 'sf_foreign_income.csv')
+
+write_csv(sf_native_incomefilter, 'sf_native_income.csv')
